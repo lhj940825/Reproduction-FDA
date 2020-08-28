@@ -21,8 +21,8 @@ CS_weights = torch.from_numpy(CS_weights)
 
 
 def main():
-    opt = TrainOptions()
-    args = opt.initialize()
+    opt = TrainOptions() # loading train options(arg parser)
+    args = opt.initialize() # get arguments
     os.environ["CUDA_VISIBLE_DEVICES"] = args.GPU
     _t = {'iter time' : Timer()}
 
@@ -30,7 +30,7 @@ def main():
     if not os.path.exists(args.snapshot_dir):
         os.makedirs(args.snapshot_dir)
         os.makedirs(os.path.join(args.snapshot_dir, 'logs'))
-    opt.print_options(args)
+    opt.print_options(args) # print set options
 
     sourceloader, targetloader = CreateSrcDataLoader(args), CreateTrgDataLoader(args)
     sourceloader_iter, targetloader_iter = iter(sourceloader), iter(targetloader)
