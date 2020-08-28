@@ -39,9 +39,12 @@ class cityscapesDataSetLabel(data.Dataset):
         image = np.asarray( image, np.float32 )
         label = np.asarray( label, np.float32 )
 
+
+
         label_copy = self.ignore_label * np.ones(label.shape, dtype=np.float32)
-        for k, v in self.id_to_trainid.items():
+        for k, v in self.id_to_trainid.items(): #255 denotes non-interesting label, here they ignore a pixel with label 255.
             label_copy[label == k] = v
+
 
         size = image.shape
         image = image[:, :, ::-1]  # change to BGR

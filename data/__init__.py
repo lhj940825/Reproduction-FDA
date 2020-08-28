@@ -30,7 +30,9 @@ def CreateSrcDataLoader(args):
     return source_dataloader
 
 def CreateTrgDataLoader(args):
+
     if args.set == 'train' or args.set == 'trainval':
+
         target_dataset = cityscapesDataSetLabel( args.data_dir_target, 
                                                  args.data_list_target, 
                                                  crop_size=image_sizes['cityscapes'], 

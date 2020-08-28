@@ -22,8 +22,8 @@ class TrainOptions():
         parser.add_argument("--label-folder", type=str, default=None, help="Path to the directory containing the pseudo labels.")
 
         parser.add_argument("--batch-size", type=int, default=1, help="input batch size.")
-        #parser.add_argument("--num-steps", type=int, default=150000, help="Number of training steps.")
-        parser.add_argument("--num-steps", type=int, default=150, help="Number of training steps.")
+        parser.add_argument("--num-steps", type=int, default=150000, help="Number of training steps.")
+        #parser.add_argument("--num-steps", type=int, default=150, help="Number of training steps.")
         parser.add_argument("--num-steps-stop", type=int, default=100000, help="Number of training steps for early stopping.")
         parser.add_argument("--num-workers", type=int, default=4, help="number of threads.")
         parser.add_argument("--learning-rate", type=float, default=2.5e-4, help="initial learning rate for the segmentation network.")
@@ -35,9 +35,8 @@ class TrainOptions():
         parser.add_argument("--init-weights", type=str, default=None, help="initial model.")
         parser.add_argument("--restore-from", type=str, default=None, help="Where restore model parameters from.")
 
-        #parser.add_argument("--save-pred-every", type=int, default=2500, help="Save summaries and checkpoint every often.")
-        parser.add_argument("--save-pred-every", type=int, default=100,
-                            help="Save summaries and checkpoint every often.")
+        parser.add_argument("--save-pred-every", type=int, default=2500, help="Save summaries and checkpoint every often.")
+        #parser.add_argument("--save-pred-every", type=int, default=100,help="Save summaries and checkpoint every often.")
         parser.add_argument("--print-freq", type=int, default=100, help="print loss and time fequency.")
         parser.add_argument("--matname", type=str, default='loss_log.mat', help="mat name to save loss")
         parser.add_argument("--tempdata", type=str, default='tempdata.mat', help="mat name to save data")

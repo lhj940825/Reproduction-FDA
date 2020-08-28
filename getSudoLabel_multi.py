@@ -93,7 +93,7 @@ def main():
         label = predicted_label[index]
         prob = predicted_prob[index]
         for i in range(19):
-            label[   (prob<thres[i]) * (label==i)   ] = 255  
+            label[   (prob<thres[i]) * (label==i)   ] = 255 # if prediction score is lower than threshold-> not use as
         output = np.asarray(label, dtype=np.uint8)
         output = Image.fromarray(output)
         name = name.split('/')[-1]
