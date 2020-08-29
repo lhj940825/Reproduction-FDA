@@ -3,7 +3,7 @@ import os.path as osp
 from PIL import Image
 from torch.utils import data
 
-class cityscapesDataSetSSL(data.Dataset):
+class cityscapesDataSetSSL(data.Dataset): # dataset class which is used to load generated pesudo labels for self-supervised learning
     def __init__(self, root, list_path, crop_size=(11, 11), mean=(128, 128, 128), max_iters=None, set='val', label_folder=None):
         self.root = root
         self.list_path = list_path
@@ -22,7 +22,7 @@ class cityscapesDataSetSSL(data.Dataset):
     def __getitem__(self, index):
         name = self.img_ids[index]
         image = Image.open(osp.join(self.root, "leftImg8bit/%s/%s" % (self.set, name))).convert('RGB')
-        label = Image.open(osp.join(self.root, self.label_folder+"/%s" % name.split('/')[1]))
+        label = Image.open(osp.join(self.root, self.label_folder+"/%s" % name.split('/')[1])) # load corresponding pesudo label
         # resize
         image = image.resize(self.crop_size, Image.BICUBIC)
         image = np.asarray(image, np.float32)

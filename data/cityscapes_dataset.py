@@ -12,7 +12,7 @@ class cityscapesDataSet(data.Dataset):
         self.crop_size = crop_size
         self.mean = mean
         self.img_ids = [i_id.strip() for i_id in open(list_path)]
-        print(open(list_path))
+
         if not max_iters==None:
             self.img_ids = self.img_ids * int( np.ceil(float(max_iters)/len(self.img_ids)) )
         self.files = []

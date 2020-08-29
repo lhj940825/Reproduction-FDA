@@ -5,7 +5,7 @@ import os.path as osp
 from PIL import Image
 from torch.utils import data
 
-class cityscapesDataSetLabel(data.Dataset):
+class cityscapesDataSetLabel(data.Dataset): #return target(cityscape) dataset with corresponding labels
     # for reading CS with labels
     def __init__(self, root, list_path, crop_size=(11, 11), mean=(128, 128, 128), max_iters=None, set='val'):
         self.root = root    # cityscapes

@@ -32,7 +32,7 @@ def main():
     model3.eval()
     model3.cuda()
 
-    targetloader = CreateTrgDataSSLLoader(args)
+    targetloader = CreateTrgDataSSLLoader(args) #no performance evaluation, just load the darget dataset in order to generate pesudo label
 
     # change the mean for different dataset
     IMG_MEAN = np.array((104.00698793, 116.66876762, 122.67891434), dtype=np.float32)
@@ -93,7 +93,7 @@ def main():
         label = predicted_label[index]
         prob = predicted_prob[index]
         for i in range(19):
-            label[   (prob<thres[i]) * (label==i)   ] = 255 # if prediction score is lower than threshold-> not use as
+            label[   (prob<thres[i]) * (label==i)   ] = 255 # if prediction score is lower than threshold-> not use as pesudo label
         output = np.asarray(label, dtype=np.uint8)
         output = Image.fromarray(output)
         name = name.split('/')[-1]
