@@ -229,11 +229,11 @@ class ResNet101(nn.Module):
         assert predict.size(3) == target.size(2), "{0} vs {1} ".format(predict.size(3), target.size(3))
 
         n, c, h, w = predict.size()
-        target_mask = (target >= 0) * (target != 255)
+        target_mask = (target >= 0) * (target != 255) # ignore the entries marked as 255
         target = target[target_mask]
         if not target.data.dim():
             return Variable(torch.zeros(1))
-        predict = predict.transpose(1, 2).transpose(2, 3).contiguous()
+        predict = predict.transpose(1, 2).transpose(2, 3).contiguous() #B
         predict = predict[target_mask.view(n, h, w, 1).repeat(1, 1, 1, c)].view(-1, c)
 
         loss = F.cross_entropy(predict, target, weight=weight, size_average=size_average)

@@ -29,9 +29,9 @@ class cityscapesDataSetSSL(data.Dataset): # dataset class which is used to load 
         label = np.asarray(label, np.float32)
 
         size = image.shape
-        image = image[:, :, ::-1]  # change to BGR
+        image = image[:, :, ::-1]  # change to BGR(simply flip all channels: RGB-> BGR)
         image -= self.mean
-        image = image.transpose((2, 0, 1))
+        image = image.transpose((2, 0, 1)) # (reversed_channel, height, width)
 
         return image.copy(), label.copy(), np.array(size), name
 

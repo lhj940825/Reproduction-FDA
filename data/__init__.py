@@ -5,6 +5,8 @@ from data.cityscapes_dataset import cityscapesDataSet
 from data.cityscapes_dataset_label import cityscapesDataSetLabel
 from data.cityscapes_dataset_SSL import cityscapesDataSetSSL
 from data.synthia_dataset import SYNDataSet
+from data.bdd100kdataset_label import BDD100kDatasetLabel
+from data.bdd100k_dataset import BDD100kDataset
 
 IMG_MEAN = np.array((0.0, 0.0, 0.0), dtype=np.float32)
 image_sizes = {'cityscapes': (1024,512), 'gta5': (1280, 720), 'synthia': (1280, 760)}
@@ -93,3 +95,32 @@ def CreatePseudoTrgLoader(args):
 
     return target_dataloader
 
+def CreateTrgBDD100kLoader(args):
+    if args.set == 'train' or args.set == 'trainval':
+
+        target_dataset = BDD100kDatasetLabel( args.data_dir_target,
+                                                 args.data_list_target,
+                                                 crop_size=image_sizes['cityscapes'],
+                                                 mean=IMG_MEAN,
+                                                 max_iters=args.num_steps * args.batch_size,
+                                                 set=args.set )
+    else:
+        target_dataset = BDD100kDataset( args.data_dir_target,
+                                            args.data_list_target,
+                                            crop_size=cs_size_test['cityscapes'],
+                                            mean=IMG_MEAN,
+                                            set=args.set )
+
+    if args.set == 'train' or args.set == 'trainval':
+        target_dataloader = data.DataLoader( target_dataset,
+                                             batch_size=args.batch_size,
+                                             shuffle=True,
+                                             num_workers=args.num_workers,
+                                             pin_memory=True )
+    else:
+        target_dataloader = data.DataLoader( target_dataset,
+                                             batch_size=1,
+                                             shuffle=False,
+                                             pin_memory=True )
+
+    return target_dataloader

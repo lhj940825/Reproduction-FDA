@@ -43,8 +43,11 @@ class BDD100k_preprocessor():
         # make directories needed to store sorted images and labels and retrieve the directories where the sorted images and labels will be stored
         _destin_image_dir, _destin_label_dir = self.build_directory_structure()
 
+        # Note that out of 60000(approximate) 'id' of images in bdd100k json file, only 3000 images actually exist in bdd100k dataset.
         image_not_found_cnt = 0
         total_image_cnt = 0
+        found_image_list = [] # list to store the id and weather attributes of found images(co-existing in bdd100k json file and bdd100k dataset.
+
         for i_data in self.BDD100k_data:
             total_image_cnt += 1
 
@@ -57,10 +60,20 @@ class BDD100k_preprocessor():
                 copyfile(os.path.join(origin_label_dir, i_data['id'].replace('.jpg', '_train_id.png')),
                          os.path.join(destin_label_dir, i_data['id'].replace('.jpg', '_train_id.png')))
 
+                found_image_list.append(i_data)
 
             except Exception:
                 image_not_found_cnt +=1
+
         print('{}-image found from {} containing {} images'.format( total_image_cnt - image_not_found_cnt, self.BDD100k_json_file_name, total_image_cnt))
+
+
+        with open(os.path.join(self.BDD100k_json_path, str(data_type)+'.txt'), 'w') as file:
+            for image_id in found_image_list:
+                if image_id['weather'] == 'clear': # currently we only use images whose weather attribute is 'clear'
+                    file.write(image_id['id'] + '\n')
+
+
 
     def build_directory_structure(self):
         """
@@ -126,3 +139,6 @@ if __name__ == '__main__':
 
     bdd100k_preprocessor = BDD100k_preprocessor(args)
     bdd100k_preprocessor.preprocess()
+
+# command(at /media/data/hlim/FDA/FDA)
+# ##  python3 utils/BDD100k_preprocessor.py
