@@ -12,18 +12,18 @@ class BDD100k_preprocessor():
     """
 
     def __init__(self, args: argparse):
-        self.BDD100k_json_path=args.BDD100k_json_path
-        self.BDD100k_json_file_name = args.BDD100k_json_file_name
-        self.BDD100k_dir = args.BDD100k_dir
-        self.BDD100k_image_dir = args.BDD100k_image_dir
-        self.BDD100k_label_dir = args.BDD100k_label_dir
+        self.BDD100k_json_path=args.C_Driving_json_path
+        self.BDD100k_json_file_name = args.C_Driving_json_file_name
+        self.BDD100k_dir = args.C_Driving_dir
+        self.BDD100k_image_dir = args.C_Driving_source_image_dir
+        self.BDD100k_label_dir = args.C_Driving_target_image_label_dir
         self.root=args.root
 
         self.weathers = "rainy|snowy|clear|overcast|undefined|partly cloudy|foggy"
 
 
 
-    def preprocess(self):
+    def split_dataset(self):
         # extract name and weather of each image from BDD100k dataset
         self.BDD100k_data = [{'id': i_data['name'], 'weather': i_data['attributes']['weather']} for i_data in
                              json.load(open(os.path.join(self.BDD100k_json_path, self.BDD100k_json_file_name)))]
@@ -126,6 +126,9 @@ class BDD100k_preprocessor():
 
 
 if __name__ == '__main__':
+    #TODO Before run this, place the bdd100k_labels_images_train.json and bdd100k_labels_images_val.json under the ./datset/BDD100k_list
+    # also place the BDD100k dataset under ../data_semseg
+
     parser = argparse.ArgumentParser(description="script for preprocessing the BDD100K dataset: Sort out the images by weather")
     parser.add_argument('--BDD100k_json_path', type=str, default='./dataset/BDD100k_list')
     parser.add_argument('--BDD100k_json_file_name', type=str, default='bdd100k_labels_images_train.json')
@@ -138,7 +141,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     bdd100k_preprocessor = BDD100k_preprocessor(args)
-    bdd100k_preprocessor.preprocess()
+    bdd100k_preprocessor.split_dataset()
 
 # command(at /media/data/hlim/FDA/FDA)
 # ##  python3 utils/BDD100k_preprocessor.py

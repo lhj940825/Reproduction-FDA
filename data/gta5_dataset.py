@@ -34,12 +34,14 @@ class GTA5DataSet(data.Dataset):
         image = image.resize(self.resize, Image.BICUBIC)
         label = label.resize(self.resize, Image.NEAREST)
 
+
         # (left, upper, right, lower)
         left = self.resize[0]-self.crop_size[0]
         upper= self.resize[1]-self.crop_size[1]
 
         left = np.random.randint(0, high=left)
         upper= np.random.randint(0, high=upper)
+
         right= left + self.crop_size[0]
         lower= upper+ self.crop_size[1]
 

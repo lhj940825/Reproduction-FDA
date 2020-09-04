@@ -1,4 +1,5 @@
-# Created by Hojun Lim(Media Informatics, 405165) at 30.08.20
+# Created by Hojun Lim(Media Informatics, 405165) at 31.08.20
+
 
 import argparse
 import os.path as osp
@@ -15,19 +16,19 @@ class TrainOptions():
         parser.add_argument("--switch2entropy", type=int, default=50000, help="switch to entropy after this many steps")
 
         parser.add_argument("--source", type=str, default='gta5', help="source dataset : gta5 or synthia")
-        parser.add_argument("--target", type=str, default='bdd100k', help="target dataset : cityscapes")
+        parser.add_argument("--target", type=str, default='c_driving', help="target dataset : c_driving")
         parser.add_argument("--snapshot-dir", type=str, default='../checkpoints/FDA',
                             help="Where to save snapshots of the model.")
         parser.add_argument("--tensorboard-log-dir", type=str, default='../checkpoints/FDA',
-                            help="Where to save log file of the model.")
+                            help="Where to save log file of the model for visualization with tensorboard.")
         parser.add_argument("--data-dir", type=str, default='../data_semseg/GTA5',
                             help="Path to the directory containing the source dataset.")
         parser.add_argument("--data-list", type=str, default='./dataset/gta5_list/train.txt',
                             help="Path to the listing of images in the source dataset.")
-        parser.add_argument("--data-dir-target", type=str, default='../data_semseg/bdd100k',
+        parser.add_argument("--data-dir-target", type=str, default='../data_semseg/C-Driving',
                             help="Path to the directory containing the target dataset.")
-        parser.add_argument("--data-list-target", type=str, default='./dataset/BDD100k_list/train.txt',
-                            help="list of images in the target dataset.")
+        parser.add_argument("--data-list-target", type=str, default='./dataset/C_Driving_list',
+                            help="directory where the list of images in the target dataset is.")
         parser.add_argument("--set", type=str, default='train', help="choose adaptation set.")
         parser.add_argument("--label-folder", type=str, default=None,
                             help="Path to the directory containing the pseudo labels.")
@@ -35,7 +36,7 @@ class TrainOptions():
         parser.add_argument("--batch-size", type=int, default=1, help="input batch size.")
         parser.add_argument("--num-steps", type=int, default=150000, help="Number of training steps.")
         # parser.add_argument("--num-steps", type=int, default=150, help="Number of training steps.")
-        parser.add_argument("--num-steps-stop", type=int, default=100000,
+        parser.add_argument("--num-steps-stop", type=int, default=45000,
                             help="Number of training steps for early stopping.")
         parser.add_argument("--num-workers", type=int, default=4, help="number of threads.")
         parser.add_argument("--learning-rate", type=float, default=2.5e-4,
@@ -55,6 +56,15 @@ class TrainOptions():
         parser.add_argument("--print-freq", type=int, default=100, help="print loss and time fequency.")
         parser.add_argument("--matname", type=str, default='loss_log.mat', help="mat name to save loss")
         parser.add_argument("--tempdata", type=str, default='tempdata.mat', help="mat name to save data")
+
+        parser.add_argument("--weather", type=str, default='cloudy',
+                            help="value of the weather attribute: cloudy, rainy, snowy, overcast")
+        parser.add_argument("--_type", type=str, default='compound',
+                            help="either compound, open_not_used, open")
+        parser.add_argument('--devkit_dir', type=str, default='./dataset/cityscapes_list',
+                            help='list directory of cityscapes')
+        parser.add_argument('--FDA_mode', type=str, default='on',
+                            help='whether to apply the amplitude-switch between source and target or not')
 
         return parser.parse_args()
 

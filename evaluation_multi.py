@@ -25,12 +25,12 @@ def colorize_mask(mask):
     new_mask.putpalette(palette)
     return new_mask
 
-def fast_hist(a, b, n):
+def fast_hist(a, b, n): #a: label(flatten), b:prediction, n: num_class
     k = (a>=0) & (a<n)
     return np.bincount( n*a[k].astype(int)+b[k], minlength=n**2 ).reshape(n, n)
 
 def per_class_iu(hist):
-    return np.diag(hist) / ( hist.sum(1)+hist.sum(0)-np.diag(hist) )
+    return np.diag(hist) / ( hist.sum(1)+hist.sum(0)-np.diag(hist) ) # nominator= intersection part(diagonal) of confusion matrix, denominator = union part of confusion matrix, hist here seems to be the confusion matrix
 
 def label_mapping(input, mapping):
     output = np.copy(input)
@@ -50,17 +50,21 @@ def compute_mIoU( gt_dir, pred_dir, devkit_dir='', restore_from='' ):
 
     image_path_list = osp.join( devkit_dir, 'val.txt')
     label_path_list = osp.join( devkit_dir, 'label.txt')
-    gt_imgs = open(label_path_list, 'r').read().splitlines()
+    gt_imgs = open(label_path_list, 'r').read().splitlines() #store image-id by image-id
     gt_imgs = [osp.join(gt_dir, x) for x in gt_imgs]
     pred_imgs = open(image_path_list, 'r').read().splitlines()
     pred_imgs = [osp.join(pred_dir, x.split('/')[-1]) for x in pred_imgs]
+    ##TODO code above: from val.txt and label.txt extract the image id to evaluate with corresponding labels.
+    ## and store paths to access those images and labels for validations and predictive network output(image, pred_imgs)
+
     for ind in range(len(gt_imgs)):
         pred  = np.array(Image.open(pred_imgs[ind]))
         label = np.array(Image.open(gt_imgs[ind]))
         label = label_mapping(label, mapping)
-        if len(label.flatten()) != len(pred.flatten()):
+        if len(label.flatten()) != len(pred.flatten()): #size doesn't match
             print('Skipping: len(gt) = {:d}, len(pred) = {:d}, {:s}, {:s}'.format( len(label.flatten()), len(pred.flatten()), gt_imgs[ind], pred_imgs[ind] ))
             continue
+
         hist += fast_hist(label.flatten(), pred.flatten(), num_classes)
         if ind > 0 and ind % 10 == 0:
             with open(restore_from+'_mIoU.txt', 'a') as f:
@@ -127,7 +131,7 @@ def main():
                 mean_img = IMG_MEAN.repeat(B,1,H,W)             # 2. get mean image
             image = image.clone() - mean_img                    # 3, image - mean_img
             image = Variable(image).cuda()
- 
+
             # forward
             output1 = model1(image)
             output1 = nn.functional.softmax(output1, dim=1)
@@ -147,10 +151,10 @@ def main():
 
             output_nomask = np.asarray( np.argmax(output, axis=2), dtype=np.uint8 )
             output_col = colorize_mask(output_nomask)
-            output_nomask = Image.fromarray(output_nomask)    
+            output_nomask = Image.fromarray(output_nomask)
             name = name[0].split('/')[-1]
-            output_nomask.save(  '%s/%s' % (args.save, name)  )
-            output_col.save(  '%s/%s_color.png' % (args.save, name.split('.')[0])  ) 
+            output_nomask.save(  '%s/%s' % (args.save, name) ) # image = (height, width)
+            output_col.save(  '%s/%s_color.png' % (args.save, name.split('.')[0])  )
     # scores computed and saved
     # ------------------------------------------------- #
     compute_mIoU( args.gt_dir, args.save, args.devkit_dir, args.restore_from )    

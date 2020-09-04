@@ -179,7 +179,6 @@ class ResNet101(nn.Module):
             x = nn.functional.interpolate(x, size=(h, w), mode='bilinear', align_corners=True)
             if lbl is not None:
                 self.loss_seg = self.CrossEntropy2d(x, lbl, weight=weight)
-
         return x
 
     def get_1x_lr_params_NOscale(self):

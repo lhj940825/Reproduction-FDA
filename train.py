@@ -76,7 +76,7 @@ def main():
         # 1. source to target, target to target
         src_in_trg = FDA_source_to_target( src_img, trg_img, L=args.LB )            # src_lbl
         trg_in_trg = trg_img
-
+        print(np.shape(src_img), np.shape(trg_img))
         # 2. subtract mean
         src_img = src_in_trg.clone() - mean_img                                 # src, src_lbl
         trg_img = trg_in_trg.clone() - mean_img                                 # trg, trg_lbl
