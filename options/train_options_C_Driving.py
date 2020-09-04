@@ -36,7 +36,7 @@ class TrainOptions():
         parser.add_argument("--batch-size", type=int, default=1, help="input batch size.")
         parser.add_argument("--num-steps", type=int, default=150000, help="Number of training steps.")
         # parser.add_argument("--num-steps", type=int, default=150, help="Number of training steps.")
-        parser.add_argument("--num-steps-stop", type=int, default=45000,
+        parser.add_argument("--num-steps-stop", type=int, default=100000,
                             help="Number of training steps for early stopping.")
         parser.add_argument("--num-workers", type=int, default=4, help="number of threads.")
         parser.add_argument("--learning-rate", type=float, default=2.5e-4,
