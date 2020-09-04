@@ -49,6 +49,7 @@ class TrainOptions():
         parser.add_argument("--num-classes", type=int, default=19, help="Number of classes for cityscapes.")
         parser.add_argument("--init-weights", type=str, default='../checkpoints/FDA/init_weight/DeepLab_init.pth', help="initial model.")
         parser.add_argument("--restore-from", type=str, default=None, help="Where restore model parameters from.")
+        parser.add_argument("--restore-model-optimizer-from", type=str, default=None, help="Where restore model parameters from.")
 
         parser.add_argument("--save-pred-every", type=int, default=2500,
                             help="Save summaries and checkpoint every often.")

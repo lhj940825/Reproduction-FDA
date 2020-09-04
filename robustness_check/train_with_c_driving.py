@@ -2,7 +2,6 @@
 
 import numpy as np
 from options.train_options_C_Driving import TrainOptions
-from options.train
 from utils.timer import Timer
 import os
 from data import CreateSrcDataLoader_with_C_Driving_Cropsize
@@ -16,6 +15,8 @@ from utils import FDA_source_to_target
 import scipy.io as sio
 from torch.utils.tensorboard import SummaryWriter
 from utils.mIoU_utils import compute_mIoU
+from utils.torch_utils import draw_in_tensorboard, load_model_and_optimizer
+from utils.viz_segmask import colorize_mask
 import shutil
 
 SRC_IMG_MEAN = np.array((104.00698793, 116.66876762, 122.67891434), dtype=np.float32)
@@ -26,6 +27,7 @@ CS_weights = np.array((1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
                        1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0), dtype=np.float32)
 CS_weights = torch.from_numpy(CS_weights)
 
+import scipy.misc
 
 def main():
 
@@ -48,14 +50,26 @@ def main():
     model, optimizer = CreateModel(args)
 
     start_iter = 0
-    if args.restore_from is not None:
-        start_iter = int(args.restore_from.rsplit('/', 1)[1].rsplit('_')[1])
+    if args.restore_model_optimizer_from is not None: # when to resume the training given ckeckpoint
+        start_iter = int(args.restore_model_optimizer_from.split('_')[-1].split('.')[0]) # extract the information of the iteration
+        checkpoint = torch.load(os.path.join(args.snapshot_dir, args.restore_model_optimizer_from))
+        load_model_and_optimizer(model, optimizer, checkpoint)
+        """
+        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        for state in optimizer.state.values():
+            for k, v in state.items():
+                if isinstance(v, torch.Tensor):
+                    state[k] = v.cuda()
+        model.load_state_dict(checkpoint['model_state_dict'])
+        """
+
 
     cudnn.enabled = True
     cudnn.benchmark = True
 
     model.train()
     model.cuda()
+
 
     # losses to log
     loss = ['loss_seg_src', 'loss_seg_trg']
@@ -69,14 +83,17 @@ def main():
 
     # prepare directories for saving the training and val-loss log files for tensorboard
     root_log_dir = os.path.join(args.tensorboard_log_dir, 'SingleNode_LB_'+str(args.LB).replace('.', '_') + '_%s_FDA_%s' %(args.weather, args.FDA_mode))
-    if os.path.isdir(root_log_dir):
-        shutil.rmtree(root_log_dir) # remove the existing log files from previous run
+    if os.path.isdir(root_log_dir) and args.restore_model_optimizer_from is None:
+        shutil.rmtree(root_log_dir) # if the log dir already exists and the restoration is not required then remove the existing log files and start logging from the beginning
 
+    # initialize the writers for tensorboard visualization
     train_log_dir = os.path.join( root_log_dir,'train(src seg loss)')
     val_log_dir = os.path.join(root_log_dir ,'val(tar seg loss)')
     mIoU_log_dir = os.path.join(root_log_dir,'mIoU(tar loss)')
+    image_log_dir = os.path.join(root_log_dir, 'image')
+
     os.makedirs(train_log_dir, exist_ok=True), os.makedirs(val_log_dir, exist_ok=True), os.makedirs(mIoU_log_dir, exist_ok=True)
-    train_loss_writer, val_loss_writer, mIoU_loss_writer = SummaryWriter(log_dir= train_log_dir), SummaryWriter(log_dir= val_log_dir), SummaryWriter(log_dir=mIoU_log_dir)
+    train_loss_writer, val_loss_writer, mIoU_loss_writer, image_writer = SummaryWriter(log_dir= train_log_dir), SummaryWriter(log_dir= val_log_dir), SummaryWriter(log_dir=mIoU_log_dir), SummaryWriter(log_dir=image_log_dir)
     #val_loss_writer = SummaryWriter(log_dir= val_log_dir)
 
     _t['iter time'].tic()
@@ -154,6 +171,9 @@ def main():
             train_loss_writer.add_scalar('loss', loss_train, global_step= (i+1) )
             #val_loss_writer.add_scalar('loss', loss_val, global_step=(i + 1))
 
+            draw_in_tensorboard(image_writer, src_in_trg, i + 1, src_seg_score, args.num_classes, 'src')
+            draw_in_tensorboard(image_writer, trg_in_trg, i + 1, trg_seg_score, args.num_classes, 'trg')
+
             loss_train = 0.0
             loss_val = 0.0
 
@@ -164,11 +184,13 @@ def main():
 
         if (i + 1) % args.save_pred_every == 0:
             print('taking snapshot ...')
-            torch.save(model.state_dict(), os.path.join(args.snapshot_dir, '%s_2_%s_LB_%s_%s_FDA_%s_iter_' % (args.source, args.target, str(args.LB).replace('.', '_'), args.weather, args.FDA_mode) + str(i + 1) + '.pth'))
+            checkpoint = {'model_state_dict': model.state_dict(), 'optimizer_state_dict' : optimizer.state_dict()}
+            torch.save(checkpoint, os.path.join(args.snapshot_dir, '%s_2_%s_LB_%s_%s_FDA_%s_iter_' % (args.source, args.target, str(args.LB).replace('.', '_'), args.weather, args.FDA_mode) + str(i + 1) + '.pth'))
 
             loss_mIoU19 = compute_mIoU(val_targetloader, TRG_IMG_MEAN, model, args.devkit_dir)  # for every (args.save_pred_every)-iteration, evaluate the network performance(mIoU) with validation set
             mIoU_loss_writer.add_scalar('mIoU19', loss_mIoU19, global_step=(i + 1))
             print('[it %d][trg mIoU19 %.4f]' % (i + 1, loss_mIoU19))
+
 
     train_loss_writer.close()
     val_loss_writer.close()
@@ -178,8 +200,22 @@ if __name__ == '__main__':
 
     main()
 
-# command(at /media/data/hlim/FDA/FDA)
-# ##  python3 robustness_check/train_with_c_dving.py --LB=0.01 --entW=0.005 --ita=2.0 --switch2entropy=0 --FDA_mode='on'
+##------------------------------------------------------------------------------------##
+
+# command for training new model (at /media/data/hlim/FDA/FDA)
+###e.g python3 robustness_check/train_with_c_dving.py --LB=0.01 --entW=0.005 --ita=2.0 --switch2entropy=0 --FDA_mode='on' --weather='cloudy'
+
+# command to resume the training given checkpoint file (at /media/data/hlim/FDA/FDA)
+### python3 robustness_check/train_with_c_driving.py --LB=0.01 --entW=0.005 --ita=2.0 --switch2entropy=0 --FDA_mode='on' --weather='cloudy' --restore-model-optimizer-from='NAME_OF_CHECKPOINT FILE UNDER #args.snapshot-dir#'
+### e.g python3 robustness_check/train_with_c_driving.py --LB=0.01 --entW=0.005 --ita=2.0 --switch2entropy=0 --FDA_mode='on' --weather='cloudy' --restore-model-optimizer-from='gta5_2_c_driving_LB_0_01_cloudy_FDA_on_iter_65000.pth'
+
+
 
 # command for tensorboard
 ### tensorboard --logdir=../checkpoints/FDA/"NAME_OF_FOLDER_WHERE_LOG_FILES_ARE"
+### e.g tensorboard --logdir=../checkpoints/FDSingleNode_LB_0_01_cloudy_FDA_on/
+
+
+
+
+##------------------------------------------------------------------------------------##

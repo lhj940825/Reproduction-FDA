@@ -19,4 +19,3 @@ src_in_trg = FDA_source_to_target_np( im_src, im_trg, L=0.01 )
 
 src_in_trg = src_in_trg.transpose((1,2,0))
 scipy.misc.toimage(src_in_trg, cmin=0.0, cmax=255.0).save('demo_images/src_in_tar.png')
-
