@@ -150,7 +150,7 @@ def CreateTrgC_DrivingLoader(args):
     else:
         target_dataloader = data.DataLoader( target_dataset,
                                              batch_size=1,
-                                             shuffle=True,
+                                             shuffle=False,
                                              pin_memory=True )
 
     return target_dataloader
@@ -165,7 +165,7 @@ def CreateTrgVal_C_DrivingLoader(args): # return the dataloader which contains i
 
     val_target_dataloader = data.DataLoader(val_target_dataset,
                                         batch_size=1,
-                                        shuffle=True,
+                                        shuffle=False,
                                         pin_memory=True)
 
     return val_target_dataloader
