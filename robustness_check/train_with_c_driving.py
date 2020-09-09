@@ -19,7 +19,6 @@ import shutil
 import wandb
 
 
-
 SRC_IMG_MEAN = np.array((104.00698793, 116.66876762, 122.67891434), dtype=np.float32)
 SRC_IMG_MEAN = torch.reshape(torch.from_numpy(SRC_IMG_MEAN), (1, 3, 1, 1))
 TRG_IMG_MEAN = np.array((104.00698793, 116.66876762, 122.67891434), dtype=np.float32) # subject to be changed if needed
