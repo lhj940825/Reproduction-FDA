@@ -31,7 +31,6 @@ def load_model_and_optimizer(model, optimizer, checkpoint):
     optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
     for state in optimizer.state.values():
         for k, v in state.items(): # send all variables in optimizer to gpu
-            print(k)
             if isinstance(v, torch.Tensor):
                 state[k] = v.cuda()
 

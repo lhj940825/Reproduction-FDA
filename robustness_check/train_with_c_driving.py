@@ -7,7 +7,6 @@ import os
 from data import CreateSrcDataLoader_with_C_Driving_Cropsize
 from data import CreateTrgC_DrivingLoader, CreateTrgVal_C_DrivingLoader
 from model import CreateModel
-# import tensorboardX
 import torch.backends.cudnn as cudnn
 import torch
 from torch.autograd import Variable
@@ -16,7 +15,6 @@ import scipy.io as sio
 from torch.utils.tensorboard import SummaryWriter
 from utils.mIoU_utils import compute_mIoU
 from utils.torch_utils import draw_in_tensorboard, load_model_and_optimizer
-from utils.viz_segmask import colorize_mask
 import shutil
 import wandb
 
@@ -28,8 +26,6 @@ TRG_IMG_MEAN = torch.reshape(torch.from_numpy(TRG_IMG_MEAN), (1,3,1,1))
 CS_weights = np.array((1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
                        1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0), dtype=np.float32)
 CS_weights = torch.from_numpy(CS_weights)
-
-import scipy.misc
 
 def main():
 
@@ -60,7 +56,6 @@ def main():
         start_iter = int(args.restore_model_optimizer_from.split('_')[-1].split('.')[0]) # extract the information of the iteration
         checkpoint = torch.load(os.path.join(args.snapshot_dir, args.restore_model_optimizer_from))
         load_model_and_optimizer(model, optimizer, checkpoint)
-        print('?')
 
     cudnn.enabled = True
     cudnn.benchmark = True
@@ -75,6 +70,8 @@ def main():
     loss_val = 0.0
     loss_train_list = []
     loss_val_list = []
+
+    max_mIoU = 0
 
     src_mean_img, trg_mean_img = torch.zeros(1, 1), torch.zeros(1, 1)
     class_weights = Variable(CS_weights).cuda()
@@ -192,6 +189,10 @@ def main():
             mIoU_loss_writer.add_scalar('mIoU19', loss_mIoU19, global_step=(i + 1))
             print('[it %d][trg mIoU19 %.4f]' % (i + 1, loss_mIoU19))
 
+            if max_mIoU < loss_mIoU19:
+                max_mIoU = loss_mIoU19
+            wandb.log({'max mIoU': max_mIoU}, step= (i+1))
+
             # log the mIoU, and source and target image at wandb
             wandb.log({'source': wandb.Image(torch.flip(src_in_trg, [1]).cpu().data[0].numpy().transpose((1,2,0))), \
                                              'target': wandb.Image(torch.flip(trg_in_trg, [1]).cpu().data[0].numpy().transpose((1,2,0)))}, step=(i+1))
@@ -211,7 +212,7 @@ if __name__ == '__main__':
 ###e.g python3 robustness_check/train_with_c_driving.py --LB=0.01 --entW=0.005 --ita=2.0 --switch2entropy=0 --FDA_mode='on' --weather='cloudy'
 
 # command to resume the training given checkpoint file (at /media/data/hlim/FDA/FDA)
-### python3 robustness_check/train_with_c_driving.py --LB=0.01 --entW=0.005 --ita=2.0 --switch2entropy=0 --FDA_mode='on' --weather='cloudy' --restore-model-optimizer-from='NAME_OF_CHECKPOINT FILE UNDER #args.snapshot-dir#'
+### python3 robustness_check/train_with_c_driving.py --LB=0.01 --entW=0.005 --ita=2.0 --switch2entropy=0 --FDA_mode='on' --weather='WEATHER YOU WANT TO RUN' --restore-model-optimizer-from='NAME_OF_CHECKPOINT FILE UNDER #args.snapshot-dir#'
 ### e.g python3 robustness_check/train_with_c_driving.py --LB=0.01 --entW=0.005 --ita=2.0 --switch2entropy=0 --FDA_mode='on' --weather='cloudy' --restore-model-optimizer-from='gta5_2_c_driving_LB_0_01_cloudy_FDA_on_iter_65000.pth'
 
 
@@ -219,8 +220,5 @@ if __name__ == '__main__':
 # command for tensorboard
 ### tensorboard --logdir=../checkpoints/FDA/"NAME_OF_FOLDER_WHERE_LOG_FILES_ARE"
 ### e.g tensorboard --logdir=../checkpoints/FDSingleNode_LB_0_01_cloudy_FDA_on/
-
-
-
 
 ##------------------------------------------------------------------------------------##
