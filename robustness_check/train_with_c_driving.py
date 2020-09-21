@@ -185,7 +185,7 @@ def main():
             checkpoint = {'model_state_dict': model.state_dict(), 'optimizer_state_dict' : optimizer.state_dict()}
             torch.save(checkpoint, os.path.join(args.snapshot_dir, '%s_2_%s_LB_%s_%s_FDA_%s_iter_' % (args.source, args.target, str(args.LB).replace('.', '_'), args.weather, args.FDA_mode) + str(i + 1) + '.pth'))
 
-            loss_mIoU19 = compute_mIoU(val_targetloader, TRG_IMG_MEAN, model, args.devkit_dir)  # for every (args.save_pred_every)-iteration, evaluate the network performance(mIoU) with validation set
+            loss_mIoU19, mIoU19_dict = compute_mIoU(val_targetloader, TRG_IMG_MEAN, model, args.devkit_dir)  # for every (args.save_pred_every)-iteration, evaluate the network performance(mIoU) with validation set
             mIoU_loss_writer.add_scalar('mIoU19', loss_mIoU19, global_step=(i + 1))
             print('[it %d][trg mIoU19 %.4f]' % (i + 1, loss_mIoU19))
 
@@ -197,6 +197,7 @@ def main():
             wandb.log({'source': wandb.Image(torch.flip(src_in_trg, [1]).cpu().data[0].numpy().transpose((1,2,0))), \
                                              'target': wandb.Image(torch.flip(trg_in_trg, [1]).cpu().data[0].numpy().transpose((1,2,0)))}, step=(i+1))
             wandb.log({'mIoU': loss_mIoU19}, step=(i+1))
+            wandb.log(mIoU19_dict, step=(i+1))
 
     train_loss_writer.close()
     val_loss_writer.close()

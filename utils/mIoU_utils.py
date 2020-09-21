@@ -8,6 +8,27 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.autograd import Variable
 
+class_names = np.asarray([
+    "road",
+    "sidewalk",
+    "building",
+    "wall",
+    "fence",
+    "pole",
+    "light",
+    "sign",
+    "vegetation",
+    "terrain",
+    "sky",
+    "person",
+    "rider",
+    "car",
+    "truck",
+    "bus",
+    "train",
+    "motocycle",
+    "bicycle"], dtype=np.str)
+
 #TODO put following functions in util python file
 def fast_hist(a, b, n): #a: label(flatten), b:prediction, n: num_class
     k = (a>=0) & (a<n) # generate the mask
@@ -92,9 +113,12 @@ def compute_mIoU(val_targetloader, TRG_IMG_MEAN, model, devkit_dir):
             hist += fast_hist(label.flatten(), pred.flatten(), num_classes) # hist.shape = (num_class, num_class), hist is the confusion matrix
         mIoUs = per_class_iu(hist)
 
+        mIoUs_dict = {}
+        for idx in range(num_classes):
+            mIoUs_dict[class_names[idx]] = round(mIoUs[idx] * 100, 2)
         #print('===> mIoU19: ' + str(round(np.nanmean(mIoUs) * 100, 2)))
         #print('===> mIoU16: ' + str(
         #    round(np.mean(mIoUs[[0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 15, 17, 18]]) * 100, 2)))
         #print('===> mIoU13: ' + str(round(np.mean(mIoUs[[0, 1, 2, 6, 7, 8, 10, 11, 12, 13, 15, 17, 18]]) * 100, 2)))
 
-    return round(np.nanmean(mIoUs) * 100, 2)
+    return round(np.nanmean(mIoUs) * 100, 2), mIoUs_dict
