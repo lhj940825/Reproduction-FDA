@@ -12,11 +12,11 @@ class BDD100k_preprocessor():
     """
 
     def __init__(self, args: argparse):
-        self.BDD100k_json_path=args.C_Driving_json_path
-        self.BDD100k_json_file_name = args.C_Driving_json_file_name
-        self.BDD100k_dir = args.C_Driving_dir
-        self.BDD100k_image_dir = args.C_Driving_source_image_dir
-        self.BDD100k_label_dir = args.C_Driving_target_image_label_dir
+        self.BDD100k_json_path=args.BDD100k_json_path
+        self.BDD100k_json_file_name = args.BDD100k_json_file_name
+        self.BDD100k_dir = args.BDD100k_dir
+        self.BDD100k_image_dir = args.BDD100k_image_dir
+        self.BDD100k_label_dir = args.BDD100k_label_dir
         self.root=args.root
 
         self.weathers = "rainy|snowy|clear|overcast|undefined|partly cloudy|foggy"

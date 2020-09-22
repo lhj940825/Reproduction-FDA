@@ -63,7 +63,7 @@ class TrainOptions():
         parser.add_argument("--_type", type=str, default='compound',
                             help="either compound, open_not_used, open")
         parser.add_argument('--devkit_dir', type=str, default='./dataset/cityscapes_list',
-                            help='list directory of cityscapes')
+                            help='directory where the information regarding label is. e.g. label mapping table, num_classes, list of class, color palete, ')
         parser.add_argument('--FDA_mode', type=str, default='on',
                             help='whether to apply the amplitude-switch between source and target or not')
 

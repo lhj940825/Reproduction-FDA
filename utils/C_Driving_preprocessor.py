@@ -14,15 +14,15 @@ class C_Driving_preprocessor():
         #self.C_Driving_json_file_name = args.C_Driving_json_file_name
         self.C_Driving_dir = args.root
         self.weathers = args.weathers.split('|')
-        self.C_Driving_source_image_dir = [os.path.join(self.C_Driving_dir, 'train', 'compound', weather) for weather in self.weathers[:3]] # for source dataset, there is no corresponding label
-        self.C_Driving_source_image_dir.append(os.path.join(self.C_Driving_dir, 'train', 'open_not_used', self.weathers[3])) # since the weather[3] = 'overcast' has different path
-        self.C_Driving_target_image_label_dir = [os.path.join(self.C_Driving_dir, 'val', 'compound', weather) for weather in self.weathers[:3]]
-        self.C_Driving_target_image_label_dir.append(os.path.join(self.C_Driving_dir, 'val', 'open',  self.weathers[3])) # since the weather[3] = 'overcast' has different path
+        self.C_Driving_train_set_dir = [os.path.join(self.C_Driving_dir, 'train', 'compound', weather) for weather in self.weathers[:3]] # for source dataset, there is no corresponding label
+        self.C_Driving_train_set_dir.append(os.path.join(self.C_Driving_dir, 'train', 'open_not_used', self.weathers[3])) # since the weather[3] = 'overcast' has different path
+        self.C_Driving_val_set_dir = [os.path.join(self.C_Driving_dir, 'val', 'compound', weather) for weather in self.weathers[:3]]
+        self.C_Driving_val_set_dir.append(os.path.join(self.C_Driving_dir, 'val', 'open', self.weathers[3])) # since the weather[3] = 'overcast' has different path
         self.C_Driving_list_path = args.C_Driving_list_path
 
 
     def preprocess(self):
-        for source_dir, target_dir, weather in zip(self.C_Driving_source_image_dir, self.C_Driving_target_image_label_dir, self.weathers):
+        for source_dir, target_dir, weather in zip(self.C_Driving_train_set_dir, self.C_Driving_val_set_dir, self.weathers):
 
             # make a txt file that stores all source image file names in it
             self.wrtie_txt(source_dir, weather, self.C_Driving_list_path)
@@ -52,4 +52,4 @@ if __name__ == '__main__':
     c_driving_preprocessor.preprocess()
 
 # command(at /media/data/hlim/FDA/FDA)
-# ##  python3 utils/BDD100k_preprocessor.py
+# ##  python3 utils/C_Driving_preprocessor.py
