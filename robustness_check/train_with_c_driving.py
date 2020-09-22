@@ -201,6 +201,7 @@ def main():
 
     train_loss_writer.close()
     val_loss_writer.close()
+    
 
 
 if __name__ == '__main__':
