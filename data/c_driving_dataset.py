@@ -19,7 +19,7 @@ class C_DrivingDataset(data.Dataset):
             self.img_ids = self.img_ids * int( np.ceil(float(max_iters)/len(self.img_ids)) )
         self.files = []
         self.set = set
-        self._type = _type # for training set, it is either 'compound' or 'open_not_used'
+        self._type = _type # it is either compound, open_not_used, open
         self.weather = weather
 
     def __len__(self):
