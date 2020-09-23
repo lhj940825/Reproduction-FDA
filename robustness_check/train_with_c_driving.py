@@ -198,6 +198,8 @@ def main():
                                              'target': wandb.Image(torch.flip(trg_in_trg, [1]).cpu().data[0].numpy().transpose((1,2,0)))}, step=(i+1))
             wandb.log({'mIoU': loss_mIoU19}, step=(i+1))
             wandb.log(mIoU19_dict, step=(i+1))
+            print('model_%d' %(i+1))
+            print(mIoU19_dict)
 
     train_loss_writer.close()
     val_loss_writer.close()
